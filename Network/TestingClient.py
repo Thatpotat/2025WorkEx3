@@ -1,28 +1,16 @@
-# Echo client program
-import socket
-import sys
+# Import socket module 
+import socket             
 
-HOST = 'daring.cwi.nl'    # The remote host
-PORT = 50007              # The same port as used by the server
-s = None
-for res in socket.getaddrinfo(HOST, PORT, socket.AF_UNSPEC, socket.SOCK_STREAM):
-    af, socktype, proto, canonname, sa = res
-    try:
-        s = socket.socket(af, socktype, proto)
-    except OSError as msg:
-        s = None
-        continue
-    try:
-        s.connect(sa)
-    except OSError as msg:
-        s.close()
-        s = None
-        continue
-    break
-if s is None:
-    print('could not open socket')
-    sys.exit(1)
-with s:
-    s.sendall(b'Hello, world')
-    data = s.recv(1024)
-print('Received', repr(data))
+# Create a socket object 
+s = socket.socket()         
+
+# Define the port on which you want to connect 
+port = 12345                
+
+# connect to the server on local computer 
+s.connect(('127.0.0.1', port)) 
+
+# receive data from the server and decoding to get the string.
+print (s.recv(1024).decode())
+# close the connection 
+s.close()

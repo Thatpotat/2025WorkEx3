@@ -1,33 +1,39 @@
-# Echo server program
-import socket
-import sys
+# first of all import the socket library 
+import socket             
 
-HOST = None               # Symbolic name meaning all available interfaces
-PORT = 50007              # Arbitrary non-privileged port
-s = None
-for res in socket.getaddrinfo(HOST, PORT, socket.AF_UNSPEC,
-                              socket.SOCK_STREAM, 0, socket.AI_PASSIVE):
-    af, socktype, proto, canonname, sa = res
-    try:
-        s = socket.socket(af, socktype, proto)
-    except OSError as msg:
-        s = None
-        continue
-    try:
-        s.bind(sa)
-        s.listen(1)
-    except OSError as msg:
-        s.close()
-        s = None
-        continue
-    break
-if s is None:
-    print('could not open socket')
-    sys.exit(1)
-conn, addr = s.accept()
-with conn:
-    print('Connected by', addr)
-    while True:
-        data = conn.recv(1024)
-        if not data: break
-        conn.send(data)
+# next create a socket object 
+s = socket.socket()         
+print ("Socket successfully created")
+
+# reserve a port on your computer in our 
+# case it is 12345 but it can be anything 
+port = 12345                
+
+# Next bind to the port 
+# we have not typed any ip in the ip field 
+# instead we have inputted an empty string 
+# this makes the server listen to requests 
+# coming from other computers on the network 
+s.bind(('', port))         
+print ("socket binded to %s" %(port)) 
+
+# put the socket into listening mode 
+s.listen(5)     
+print ("socket is listening")            
+
+# a forever loop until we interrupt it or 
+# an error occurs 
+while True: 
+
+# Establish connection with client. 
+  c, addr = s.accept()     
+  print ('Got connection from', addr )
+
+  # send a thank you message to the client. encoding to send byte type. 
+  c.send('Thank you for connecting'.encode()) 
+
+  # Close the connection with the client 
+  c.close()
+  
+  # Breaking once connection closed
+  break
