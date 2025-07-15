@@ -1,18 +1,12 @@
 import pygame
 import math
+import  keyboard
 
 pygame.init()
-
-font = pygame.font.Font(None, 50)
 
 clock = pygame.time.Clock()
 
 fps = 60
-
-screen_width = 800
-screen_height = 400
-
-screen = pygame.display.set_mode((screen_width, screen_height))
 
 speed = 5
 
@@ -35,9 +29,6 @@ class paddle():
             self.y -= speed
             self.y = max(0, self.y)
         self.rect.topleft = (self.x, self.y)
-
-    def draw(self):
-        screen.blit(self.image, (self.x, self.y))
 
 class Ball():
     def __init__(self, x, y, width, height, direction):
@@ -62,31 +53,20 @@ class Ball():
             print("collision")
             self.direction = - self.direction          
 
-    def draw(self):
-        screen.blit(self.image, (self.x, self.y))
-
 player1 = paddle(10, 150, 10, 100, (0, 255, 0))
 player2 = paddle(780, 150, 10, 100, (255, 0, 0))
 ball = Ball(400, 200, 20, 20, 270)
 
 run = True
 while run:
-    screen.fill((3, 161, 252))
     clock.tick(fps)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
+    if keyboard.is_pressed("esc"):
+        run = False
 
-    text = font.render(f"{player1.score} : {player2.score}", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(400, 20))
-    screen.blit(text, text_rect)
+    #player1.move()
 
-    player1.draw()
+    #player2.move()
 
-    player2.draw()
-
-    ball.draw()
     ball.move()
 
-    pygame.display.update()
 pygame.quit()
