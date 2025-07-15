@@ -1,41 +1,68 @@
 import socket
-import keyboard
-import time
 import threading
+import keyboard
 
-class server_connection_out():
+class ServerConnection:
     def __init__(self, port):
         self.connections = []
-        self.s = socket.socket()
-        self.p = port
-        self.s.bind(('', port))
-    
+        self.sock = socket.socket()
+        self.port = port
+        self.sock.bind(('', port))
+
     def add_connection(self):
-        self.s.listen(5)
-        newconnection = self.s.accept()
-        print(newconnection[1])
-        if not newconnection[0] in self.connections:
-            self.connections.append(newconnection[0])
+        self.sock.listen(5)
+        conn, addr = self.sock.accept()
+        print(f"Connected by {addr}")
 
-    def send_data(self, dat):
-        i:socket
-        dat = str(dat).encode()
-        for i in self.connections:
-            i.send(dat)
-    
-    def get_connections(self):
-        return self.connections
+        # Only add if not already in list
+        if conn not in self.connections:
+            self.connections.append(conn)
+            threading.Thread(target=self.receive_data, args=(conn,), daemon=True).start()
+        else:
+            print("Connection already exists. Ignored.")
 
-s = server_connection_out(12345)
-i = 0
-num_connections = int(input("How many connections wanted?\n>> "))
-while len(s.get_connections()) < num_connections:
-    s.add_connection()
-while True:
-    if keyboard.is_pressed("up_arrow"):
-        i += 1
-        s.send_data(i)
-    if keyboard.is_pressed("down_arrow"):
-        i -= 1
-        s.send_data(i)
-    time.sleep(0.1)
+    def send_data(self, data):
+        message = (str(data) + ";").encode()
+        for conn in self.connections:
+            try:
+                conn.sendall(message)
+            except:
+                print("A connection failed to send. Skipping.")
+
+    def receive_data(self, conn):
+        buffer = ""
+        while True:
+            try:
+                char = conn.recv(1).decode()
+                if not char:
+                    break
+                if char == ";":
+                    print(f"Client says: {buffer}")
+                    buffer = ""
+                else:
+                    buffer += char
+            except:
+                break
+
+server = ServerConnection(12345)
+num_clients = int(input("How many connections wanted?\n>> "))
+while len(server.connections) < num_clients:
+    server.add_connection()
+
+print("Use ↑ or ↓ arrow keys to send messages. Ctrl+C to stop.")
+counter = 0
+try:
+    while True:
+        if keyboard.is_pressed("up"):
+            counter += 1
+            server.send_data(f"UP {counter}")
+            while keyboard.is_pressed("up"):
+                pass
+
+        if keyboard.is_pressed("down"):
+            counter -= 1
+            server.send_data(f"DOWN {counter}")
+            while keyboard.is_pressed("down"):
+                pass
+except KeyboardInterrupt:
+    print("\nServer stopped.")
