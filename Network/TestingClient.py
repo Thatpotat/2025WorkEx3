@@ -21,6 +21,9 @@ threading.Thread(target=receive_messages, args=(s,), daemon=True).start()
 
 # Input loop to send data
 print("You can now type messages to send to the server:")
-while True:
-    msg = input()
-    s.sendall((msg + ";").encode())
+try:
+    while True:
+        msg = input()
+        s.sendall((msg + ";").encode())
+except KeyboardInterrupt:
+    print("\nClient stopped.")

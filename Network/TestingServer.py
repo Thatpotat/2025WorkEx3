@@ -56,13 +56,9 @@ try:
         if keyboard.is_pressed("up"):
             counter += 1
             server.send_data(f"UP {counter}")
-            while keyboard.is_pressed("up"):
-                pass
 
         if keyboard.is_pressed("down"):
             counter -= 1
             server.send_data(f"DOWN {counter}")
-            while keyboard.is_pressed("down"):
-                pass
 except KeyboardInterrupt:
     print("\nServer stopped.")
