@@ -2,13 +2,18 @@ import socket
 import threading
 import keyboard
 
+stopflag = False
+
 def receive_messages(sock):
+    global stopflag
     buffer = ""
-    while True:
+    while not stopflag:
         try:
             char = sock.recv(1).decode()
         except ConnectionResetError:
             print("\nServer closed.")
+            stopflag = True
+            exit()
         if not char:
             break
         if char == ";":
@@ -27,6 +32,8 @@ threading.Thread(target=receive_messages, args=(s,), daemon=True).start()
 print("You can now type messages to send to the server:")
 try:
     while True:
+        if stopflag:
+            exit()
         if keyboard.is_pressed("up"):
             s.sendall("0;".encode())
         if keyboard.is_pressed("down"):
