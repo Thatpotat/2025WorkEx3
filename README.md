@@ -1,2 +1,2 @@
 # 2025WorkEx3
-https://prod.liveshare.vsengsaas.visualstudio.com/join?D2181C96DDB32E901595438591ACAAA02618
+https://prod.liveshare.vsengsaas.visualstudio.com/join?591206797E9443F72C706B0F2AF6008C3F1D
