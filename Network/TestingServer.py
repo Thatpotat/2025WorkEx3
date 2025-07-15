@@ -1,39 +1,41 @@
-# first of all import the socket library 
-import socket             
+import socket
+import keyboard
+import time
+import threading
 
-# next create a socket object 
-s = socket.socket()         
-print ("Socket successfully created")
+class server_connection_out():
+    def __init__(self, port):
+        self.connections = []
+        self.s = socket.socket()
+        self.p = port
+        self.s.bind(('', port))
+    
+    def add_connection(self):
+        self.s.listen(5)
+        newconnection = self.s.accept()
+        print(newconnection[1])
+        if not newconnection[0] in self.connections:
+            self.connections.append(newconnection[0])
 
-# reserve a port on your computer in our 
-# case it is 12345 but it can be anything 
-port = 12345                
+    def send_data(self, dat):
+        i:socket
+        dat = str(dat).encode()
+        for i in self.connections:
+            i.send(dat)
+    
+    def get_connections(self):
+        return self.connections
 
-# Next bind to the port 
-# we have not typed any ip in the ip field 
-# instead we have inputted an empty string 
-# this makes the server listen to requests 
-# coming from other computers on the network 
-s.bind(('', port))         
-print ("socket binded to %s" %(port)) 
-
-# put the socket into listening mode 
-s.listen(5)     
-print ("socket is listening")            
-
-# a forever loop until we interrupt it or 
-# an error occurs 
-while True: 
-
-# Establish connection with client. 
-  c, addr = s.accept()     
-  print ('Got connection from', addr )
-
-  # send a thank you message to the client. encoding to send byte type. 
-  c.send('Thank you for connecting'.encode()) 
-
-  # Close the connection with the client 
-  c.close()
-  
-  # Breaking once connection closed
-  break
+s = server_connection_out(12345)
+i = 0
+num_connections = int(input("How many connections wanted?\n>> "))
+while len(s.get_connections()) < num_connections:
+    s.add_connection()
+while True:
+    if keyboard.is_pressed("up_arrow"):
+        i += 1
+        s.send_data(i)
+    if keyboard.is_pressed("down_arrow"):
+        i -= 1
+        s.send_data(i)
+    time.sleep(0.1)
