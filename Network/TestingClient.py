@@ -17,7 +17,7 @@ def receive_messages(sock):
         if not char:
             break
         if char == ";":
-            print(buffer)
+            print("\x1b[1A\x1b[2K"+buffer)
             buffer = ""
         else:
             buffer += char
