@@ -1,6 +1,8 @@
 import pygame
 import math
 
+
+
 pygame.init()
 
 font = pygame.font.Font(None, 50)
@@ -39,6 +41,9 @@ class paddle():
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
 
+player1:paddle
+player2:paddle
+
 class Ball():
     def __init__(self, x, y, width, height, direction):
         self.x = x
@@ -65,28 +70,36 @@ class Ball():
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
 
-player1 = paddle(10, 150, 10, 100, (0, 255, 0))
-player2 = paddle(780, 150, 10, 100, (255, 0, 0))
-ball = Ball(400, 200, 20, 20, 270)
+def main():
+    player1 = paddle(10, 150, 10, 100, (0, 255, 0))
+    player2 = paddle(780, 150, 10, 100, (255, 0, 0))
+    ball = Ball(400, 200, 20, 20, 270)
 
-run = True
-while run:
-    screen.fill((3, 161, 252))
-    clock.tick(fps)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
+    run = True
+    while run:
+        screen.fill((3, 161, 252))
+        clock.tick(fps)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
 
-    text = font.render(f"{player1.score} : {player2.score}", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(400, 20))
-    screen.blit(text, text_rect)
+        text = font.render(f"{player1.score} : {player2.score}", True, (255, 255, 255))
+        text_rect = text.get_rect(center=(400, 20))
+        screen.blit(text, text_rect)
 
-    player1.draw()
+        player1.draw()
 
-    player2.draw()
+        player2.draw()
 
-    ball.draw()
-    ball.move()
+        ball.draw()
+        ball.move()
 
-    pygame.display.update()
-pygame.quit
+        pygame.display.update()
+    pygame.quit()
+
+def parseInput(input:str):
+    input = input.split(",")
+    if input[0] == "0":
+        player1.move(input[1])
+    elif input[0] == "1":
+        player2.move(input[1])
