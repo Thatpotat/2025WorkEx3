@@ -1,5 +1,6 @@
 import socket
 import threading
+import keyboard
 
 def receive_messages(sock):
     buffer = ""
@@ -11,7 +12,7 @@ def receive_messages(sock):
         if not char:
             break
         if char == ";":
-            print(f"Server says: {buffer}")
+            print(buffer)
             buffer = ""
         else:
             buffer += char
@@ -26,8 +27,9 @@ threading.Thread(target=receive_messages, args=(s,), daemon=True).start()
 print("You can now type messages to send to the server:")
 try:
     while True:
-        msg = input()
-        s.sendall((msg + ";").encode())
-
+        if keyboard.is_pressed("="):
+            s.sendall("0;".encode())
+        if keyboard.is_pressed("-"):
+            s.sendall("1;".encode())
 except KeyboardInterrupt:
     print("\nClient stopped.")

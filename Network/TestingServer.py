@@ -1,6 +1,6 @@
 import socket
 import threading
-import keyboard
+import time
 
 class ServerConnection:
     def __init__(self, port):
@@ -38,7 +38,7 @@ class ServerConnection:
                 if not char:
                     break
                 if char == ";":
-                    print(f"Client{connid} says: {buffer}")
+                    print(f"{connid},{buffer}")
                     buffer = ""
                 else:
                     buffer += char
@@ -50,16 +50,10 @@ num_clients = int(input("How many connections wanted?\n>> "))
 while len(server.connections) < num_clients:
     server.add_connection()
 
-print("Use ↑ or ↓ arrow keys to send messages. Ctrl+C to stop.")
-counter = 0
+print("Connections established. Server started. Ctrl+C to stop.")
 try:
     while True:
-        if keyboard.is_pressed("up"):
-            counter += 1
-            server.send_data(f"UP {counter}")
-
-        if keyboard.is_pressed("down"):
-            counter -= 1
-            server.send_data(f"DOWN {counter}")
+        server.send_data("0,0,1,1,2,2;")
+        time.sleep(0.01)
 except KeyboardInterrupt:
     print("\nServer stopped.")
