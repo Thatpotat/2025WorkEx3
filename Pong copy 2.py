@@ -48,6 +48,10 @@ class Ball():
         self.rect.topleft = (self.x, self.y)
         if (self.y + self.width) >= 400 or self.y <= 0:
             self.direction = 180 - self.direction
+            if self.y <= 0:
+                player1.score +=1
+            else:
+                player2.score += 1
 
         if self.rect.clipline((player1.x + player1.width, player1.y), (player1.x + player1.width, player1.y + player1.height)) or self.rect.clipline((player2.x, player2.y), (player2.x, player2.y + player2.height)):
             print("collision")
