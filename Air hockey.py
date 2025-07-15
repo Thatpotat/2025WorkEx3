@@ -7,8 +7,8 @@ clock = pygame.time.Clock()
 
 fps = 60
 
-screen_width = 1000
-screen_height = 600
+screen_width = 1920
+screen_height = 1080
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 
@@ -63,7 +63,7 @@ puck = Puck(500, 300, puck_img)
 
 run = True
 while run:
-    screen.fill((0, 0, 0))
+    screen.fill((3, 161, 252))
     clock.tick(fps)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
