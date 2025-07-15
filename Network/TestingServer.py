@@ -30,6 +30,7 @@ class ServerConnection:
                 print("A connection failed to send. Skipping.")
 
     def receive_data(self, conn):
+        connid = self.connections.index(conn)
         buffer = ""
         while True:
             try:
@@ -37,7 +38,7 @@ class ServerConnection:
                 if not char:
                     break
                 if char == ";":
-                    print(f"Client says: {buffer}")
+                    print(f"Client{connid} says: {buffer}")
                     buffer = ""
                 else:
                     buffer += char
