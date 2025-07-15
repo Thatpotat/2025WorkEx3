@@ -46,7 +46,7 @@ class ServerConnection:
                 break
 
 server = ServerConnection(12345)
-num_clients = int(input("How many connections wanted?\n>> "))
+num_clients = 2 #int(input("How many connections wanted?\n>> "))
 while len(server.connections) < num_clients:
     server.add_connection()
 
