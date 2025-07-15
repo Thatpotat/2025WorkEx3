@@ -1,9 +1,9 @@
 import pygame
 import math
 
-pygame.init
+pygame.init()
 
-
+font = pygame.font.Font(None, 50)
 
 clock = pygame.time.Clock()
 
@@ -76,6 +76,10 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
+    text = font.render(f"{player1.score} : {player2.score}", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(400, 20))
+    screen.blit(text, text_rect)
 
     player1.draw()
 
