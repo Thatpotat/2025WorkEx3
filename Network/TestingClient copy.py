@@ -4,7 +4,10 @@ import threading
 def receive_messages(sock):
     buffer = ""
     while True:
-        char = sock.recv(1).decode()
+        try:
+            char = sock.recv(1).decode()
+        except ConnectionResetError:
+            print("\nServer closed.")
         if not char:
             break
         if char == ";":
@@ -25,5 +28,6 @@ try:
     while True:
         msg = input()
         s.sendall((msg + ";").encode())
+
 except KeyboardInterrupt:
     print("\nClient stopped.")

@@ -27,7 +27,7 @@ class ServerConnection:
             try:
                 conn.sendall(message)
             except:
-                print("A connection failed to send. Skipping.")
+                print(f"Client{self.connections.index(conn)} connection failed to send. Skipping.")
 
     def receive_data(self, conn):
         connid = self.connections.index(conn)
