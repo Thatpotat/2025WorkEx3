@@ -38,7 +38,7 @@ class ServerConnection:
                 if not char:
                     break
                 if char == ";":
-                    print(f"{connid},{buffer}")
+                    print(f"\x1b[1A\x1b[2K{connid},{buffer}")
                     buffer = ""
                 else:
                     buffer += char
@@ -50,10 +50,10 @@ num_clients = 2 #int(input("How many connections wanted?\n>> "))
 while len(server.connections) < num_clients:
     server.add_connection()
 
-print("Connections established. Server started. Ctrl+C to stop.")
+print("Connections established. Server started. Ctrl+C to stop.\n")
 try:
     while True:
-        server.send_data("0,0,1,1,2,2;")
-        time.sleep(0.01)
+        server.send_data("0,0,1,1,2,2")
+        time.sleep(0.05)
 except KeyboardInterrupt:
     print("\nServer stopped.")
