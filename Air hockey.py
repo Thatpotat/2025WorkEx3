@@ -7,8 +7,8 @@ clock = pygame.time.Clock()
 
 fps = 60
 
-screen_width = 1920
-screen_height = 1080
+screen_width = 1000
+screen_height = 600
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 
@@ -26,18 +26,18 @@ class mallet():
         self.speed = 0
 
     def draw(self):
-        screen.blit(self.image, (self.x, self.y))
+        screen.blit(self.image, (self.x - self.width / 2, self.y - self.height / 2))
 
     def move(self):
-        initial_pos = (self.x, self.y)
         mouse_pos = pygame.mouse.get_pos()
-        self.x = mouse_pos[0] - self.width / 2
-        self.y = mouse_pos[1] - self.height / 2
-        new_pos = (self.x, self.y)
-        delta_x = new_pos[0] - initial_pos[0]
-        delta_y = new_pos[1] - initial_pos[1]
-        self.speed = min(math.sqrt(delta_x ** 2 + delta_y ** 2), 20)
-        print(self.speed)
+        delta_x = self.x - mouse_pos[0]
+        delta_y = self.y - mouse_pos[1]
+        self.speed = math.sqrt(delta_x ** 2 + delta_y ** 2)
+        self.speed = min(self.speed, 20)
+        direction = math.degrees(math.atan2(math.radians(delta_x), math.radians(delta_y))) + 180
+        print(direction)
+        self.x += math.sin(math.radians(direction)) * self.speed
+        self.y += math.cos(math.radians(direction)) * self.speed
 
 class Puck():
     def __init__(self, x ,y, image):
@@ -59,11 +59,11 @@ class Puck():
         
 
 player1 = mallet(500, 300, mallet1)
-puck = Puck(500, 300, puck_img)
+puck = Puck(100, 100, puck_img)
 
 run = True
 while run:
-    screen.fill((3, 161, 252))
+    screen.fill((0, 0, 0))
     clock.tick(fps)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
