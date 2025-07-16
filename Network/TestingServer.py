@@ -23,7 +23,6 @@ class ServerConnection:
             return
         print(f"Connected by {addr}")
 
-        # Only add if not already in list
         if conn not in self.connections:
             self.connections.append(conn)
             threading.Thread(target=self.receive_data, args=(conn,), daemon=True).start()
@@ -41,7 +40,6 @@ class ServerConnection:
                 conn.sendall(message)
             except:
                 print(f"\x1b[2K\rClient{self.connections.index(conn)} connection failed to send. Skipping.")
-                # print(f"Client{self.connections.index(conn)} connection failed to send. Skipping.\x1b[2A\x1b[K")
 
     def receive_data(self, conn):
         connid = self.connections.index(conn)
@@ -54,15 +52,14 @@ class ServerConnection:
                 if not char:
                     break
                 if char == ";":
-                    print(f"\r\x1b[2K{connid},{buffer}", end="", flush=True)  # Overwrite line with new data
+                    print(f"\r\x1b[2K{connid},{buffer}", end="", flush=True)
                     buffer = ""
                 else:
                     buffer += char
             except:
                 break
-        # After breaking out of the loop, client has disconnected
-        print(f"\r\x1b[2K", end="")  # Clear the numbers line
-        print(f"Client{connid} has disconnected.")  # Print disconnect message on its own line
+        print(f"\r\x1b[2K", end="")
+        print(f"Client{connid} has disconnected.")
         try:
             self.connections.remove(conn)
         except ValueError:
