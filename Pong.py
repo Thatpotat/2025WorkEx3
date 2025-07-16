@@ -62,7 +62,7 @@ class Ball():
             ((player1.x + player1.width, player1.y), (player1.x + player1.width, player1.y + player1.height)), # player1 front
             ((player1.x, player1.y), (player1.x, player1.y + player1.height)), # player1 back
             ((player2.x + player2.width, player2.y), (player2.x + player2.width, player2.y + player2.height)), # player2 back
-            ((player2.x, player2.y), (player2.x, player2.y + player2.height)) # player2 front
+            ((player2.x, player2.y), (player2.x, player2.y + player2.height)),  # player2 front
         ]
         vertices = [
             (self.x, self.y), 
@@ -82,26 +82,46 @@ class Ball():
                     print(relative_y)
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
-                    self.direction =  - angle_offset - 90
+                    self.direction =  angle_offset + 90
                 elif face == faces[1]:
                     self.x, self.y = intersection[0] + self.width + 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player1.y
+                    print(relative_y)
+                    deflection_weight = relative_y / player1.height * 2 - 1
+                    angle_offset = deflection_weight * 45
+                    self.direction =  angle_offset + 90
                 elif face == faces[2]:
                     self.x, self.y = intersection[0] - 2 * self.width - 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player2.y
+                    print(relative_y)
+                    deflection_weight = relative_y / player1.height * 2 - 1
+                    angle_offset = deflection_weight * 45
+                    self.direction =  - angle_offset - 90 
                 else:
                     self.x, self.y = intersection[0] - self.width - 1, intersection[1]
-                self.direction = 360 - self.direction
-        if self.y <= 0 or self.y + self.width >= 400:
+                    relative_y = (self.y + (self.width / 2)) - player2.y
+                    deflection_weight = relative_y / player1.height * 2 - 1
+                    angle_offset = deflection_weight * 45
+                    self.direction =  - angle_offset - 90
+                self.speed += 0.25
+                self.speed = min(10, self.speed)
+
+        if self.y <= 0 or self.y + self.height >= 400:
             self.direction = 180 - self.direction
-        
+            if self.y <= 0:
+                self.y = 1
+            else:
+                self.y = 400 - self.height - 1
 
         # point detection
         if self.x + self.width <= 0 or self.x + self.width >= 800:
             if self.x + self.width <= 0:
                 player2.score += 1
             else:
-                player2.score += 1
+                player1.score += 1
             self.x, self.y = self.starting_pos
             self.direction = random.randint(1, 4) * 90 + 45
+            self.speed = 5
 
     def correct_exact_overlap(self, ball_previous_pos, ball_current_pos, paddle):
         """
@@ -151,7 +171,7 @@ def main():
     global ball
     player1 = paddle(10, 150, 10, 100, (0, 255, 0))
     player2 = paddle(780, 150, 10, 100, (255, 0, 0))
-    ball = Ball(400, 200, 20, 20, 45)
+    ball = Ball(400, 200, 20, 20, random.randint(1, 4) * 90 + 45)
 
     run = True
     while run:
