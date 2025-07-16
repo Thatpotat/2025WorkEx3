@@ -51,11 +51,10 @@ while len(server.connections) < num_clients:
     server.add_connection()
 print("Connections established. Server started. Ctrl+C to stop.\n")
 
-'''
-try:
-    while True:
-        server.send_data("0,0,1,1,2,2")
-        time.sleep(0.05)
-except KeyboardInterrupt:
-    print("\nServer stopped.")
-    '''
+if __name__ == "__main__":
+    try:
+        while True:
+            server.send_data("0,0,1,1,2,2")
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        print("\nServer stopped.")
