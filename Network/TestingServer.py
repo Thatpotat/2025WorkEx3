@@ -3,15 +3,24 @@ import threading
 import time
 
 class ServerConnection:
-    def __init__(self, port):
+    do_recv:bool
+    def __init__(self, port, limit = 2):
+        self.do_recv = False
+        self.lim = limit
         self.connections = []
         self.sock = socket.socket()
         self.port = port
         self.sock.bind(('', port))
+        while len(self.connections) < self.lim:
+            self.add_connection()
 
     def add_connection(self):
         self.sock.listen(5)
         conn, addr = self.sock.accept()
+        if len(self.connections) >= self.lim:
+            print("Connection limit reached. Ignoring new connection.")
+            conn.close()
+            return
         print(f"Connected by {addr}")
 
         # Only add if not already in list
@@ -20,6 +29,10 @@ class ServerConnection:
             threading.Thread(target=self.receive_data, args=(conn,), daemon=True).start()
         else:
             print("Connection already exists. Ignored.")
+            conn.close()
+        
+        if len(self.connections) == self.lim:
+            self.do_recv = True
 
     def send_data(self, data):
         message = (str(data) + ";").encode()
@@ -34,21 +47,19 @@ class ServerConnection:
         buffer = ""
         while True:
             try:
-                char = conn.recv(1).decode()
-                if not char:
-                    break
-                if char == ";":
-                    print(f"\x1b[1A\x1b[2K{connid},{buffer}")
-                    buffer = ""
-                else:
-                    buffer += char
+                if self.do_recv:
+                    char = conn.recv(1).decode()
+                    if not char:
+                        break
+                    if char == ";":
+                        print(f"\x1b[1A\x1b[2K{connid},{buffer}")
+                        buffer = ""
+                    else:
+                        buffer += char
             except:
                 break
 
-server = ServerConnection(12345)
-num_clients = 1 #int(input("How many connections wanted?\n>> "))
-while len(server.connections) < num_clients:
-    server.add_connection()
+server = ServerConnection(12345, 2)
 print("Connections established. Server started. Ctrl+C to stop.\n")
 time.sleep(0.1)
 if __name__ == "__main__":

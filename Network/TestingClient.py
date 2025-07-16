@@ -30,7 +30,7 @@ s.connect(('localhost', 12345))
 threading.Thread(target=receive_messages, args=(s,), daemon=True).start()
 
 # Input loop to send data
-print("You can now type messages to send to the server:")
+print("Connected to server. Press Ctrl+C to stop.\n")
 try:
     while True:
         if stopflag:

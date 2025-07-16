@@ -30,14 +30,14 @@ s.connect(('localhost', 12345))
 threading.Thread(target=receive_messages, args=(s,), daemon=True).start()
 
 # Input loop to send data
-print("You can now type messages to send to the server:")
+print("Connected to server. Press Ctrl+C to stop.\n")
 try:
     while True:
         if stopflag:
             exit()
-        if keyboard.is_pressed("="):
+        if keyboard.is_pressed("right"):
             s.sendall("0;".encode())
-        if keyboard.is_pressed("-"):
+        if keyboard.is_pressed("left"):
             s.sendall("1;".encode())
         if not (keyboard.is_pressed("=") or keyboard.is_pressed("-")):
             s.sendall("2;".encode()) 
