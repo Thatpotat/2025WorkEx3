@@ -40,24 +40,34 @@ class ServerConnection:
             try:
                 conn.sendall(message)
             except:
-                print(f"Client{self.connections.index(conn)} connection failed to send. Skipping.")
+                print(f"\x1b[2K\rClient{self.connections.index(conn)} connection failed to send. Skipping.")
+                # print(f"Client{self.connections.index(conn)} connection failed to send. Skipping.\x1b[2A\x1b[K")
 
     def receive_data(self, conn):
         connid = self.connections.index(conn)
         buffer = ""
+        while not self.do_recv:
+            pass
         while True:
             try:
-                if self.do_recv:
-                    char = conn.recv(1).decode()
-                    if not char:
-                        break
-                    if char == ";":
-                        print(f"\x1b[1A\x1b[2K{connid},{buffer}")
-                        buffer = ""
-                    else:
-                        buffer += char
+                char = conn.recv(1).decode()
+                if not char:
+                    break
+                if char == ";":
+                    print(f"\r\x1b[2K{connid},{buffer}", end="", flush=True)  # Overwrite line with new data
+                    buffer = ""
+                else:
+                    buffer += char
             except:
                 break
+        # After breaking out of the loop, client has disconnected
+        print(f"\r\x1b[2K", end="")  # Clear the numbers line
+        print(f"Client{connid} has disconnected.")  # Print disconnect message on its own line
+        try:
+            self.connections.remove(conn)
+        except ValueError:
+            pass
+        conn.close()
 
 server = ServerConnection(12345, 2)
 print("Connections established. Server started. Ctrl+C to stop.\n")
