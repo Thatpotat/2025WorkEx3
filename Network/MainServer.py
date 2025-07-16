@@ -5,7 +5,7 @@ import random
 import math
 
 # Optional: Enable display for debugging
-ENABLE_DISPLAY = False
+ENABLE_DISPLAY = True
 if ENABLE_DISPLAY:
     import pygame
 
@@ -179,19 +179,25 @@ class PongServer:
 
     def run(self):
         print("Waiting for 2 clients...")
+
+        def accept_clients():
+            while len(self.connections) < 2:
+                conn, addr = self.sock.accept()
+                print(f"Connected by {addr}")
+                self.connections.append(conn)
+                threading.Thread(target=self.handle_client, args=(conn, len(self.connections)-1), daemon=True).start()
+
+        accept_thread = threading.Thread(target=accept_clients, daemon=True)
+        accept_thread.start()
+
+        # Wait for both clients to connect before starting the game loop
         while len(self.connections) < 2:
-            conn, addr = self.sock.accept()
-            print(f"Connected by {addr}")
-            self.connections.append(conn)
-            threading.Thread(target=self.handle_client, args=(conn, len(self.connections)-1), daemon=True).start()
+            time.sleep(0.1)
         print("Both clients connected. Starting game.")
 
-        game_thread = threading.Thread(target=self.game_loop, daemon=True)
-        game_thread.start()
-
+        # Run the game loop in the main thread (fixes display freezing)
         try:
-            while game_thread.is_alive():
-                time.sleep(1)
+            self.game_loop()
         except KeyboardInterrupt:
             self.running = False
             print("Server stopped.")
