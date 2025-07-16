@@ -7,7 +7,7 @@ font = pygame.font.Font(None, 50)
 
 clock = pygame.time.Clock()
 
-fps = 60
+fps = 10
 
 screen_width = 800
 screen_height = 400
@@ -24,8 +24,8 @@ class paddle():
         self.height = height
         self.image = pygame.Surface((width, height))
         self.image.fill(colour)
-        self.rect = self.image.get_rect(topleft = (self.x, self.y))
         self.score = 0
+        self.mask = pygame.mask.from_surface(self.image)
 
     def move(self, direction):
         if direction == 0:
@@ -34,7 +34,7 @@ class paddle():
         elif direction == 1:
             self.y -= speed
             self.y = max(0, self.y)
-        self.rect.topleft = (self.x, self.y)
+        #self.rect.topleft = (self.x, self.y)
 
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
@@ -49,29 +49,71 @@ class Ball():
         self.speed = 10
         self.direction = direction
         self.image.fill((255, 255, 255))
-        self.rect = self.image.get_rect(topleft = (self.x, self.y))
+        self.mask = pygame.mask.from_surface(self.image)
 
     def move(self):
+        previous_pos  = (self.x, self.y)
         self.x += math.sin(math.radians(self.direction)) * speed
         self.y += math.cos(math.radians(self.direction)) * speed
-        self.rect.topleft = (self.x, self.y)
-        if (self.y + self.width) >= 400 or self.y <= 0:
-            self.direction = 180 - self.direction
-            if self.y <= 0:
-                player1.score +=1
-            else:
-                player2.score += 1
+        current_pos = (self.x, self.y)
+        faces = [
+        player1_front_face = ((player1.x + player1.width, player1.y), (player1.x + player1.width, player1.y + player1.height))
+        player1_back_face = ((player1.x, player1.y), (player1.x, player1.y + player1.height))
+        player2_back_face = ((player2.x + player2.width, player2.y), (player2.x + player2.width, player2.y + player2.height))
+        player2_front_face = ((player2.x, player2.y), (player2.x, player2.y + player2.height))
+        ]
+        for face in faces:
+            intersection = self.line_intersection((previous_pos), face)
+        if intersection:
+            self.x, self.y = intersection[0], intersection[1]
+            print(f"Lines intersect at {intersection}")
+        else:
+            print("Lines do not intersect.")
+    def correct_exact_overlap(self, ball_previous_pos, ball_current_pos, paddle):
+        """
+        steps = max(abs(ball_current_pos[0] - ball_previous_pos[0]), abs(ball_current_pos[1] - ball_previous_pos[1]))   
 
-        if self.rect.clipline((player1.x + player1.width, player1.y), (player1.x + player1.width, player1.y + player1.height)) or self.rect.clipline((player2.x, player2.y), (player2.x, player2.y + player2.height)):
-            print("collision")
-            self.direction = - self.direction          
+        dx = (ball_current_pos[0] - ball_previous_pos[0]) / steps
+        dy = (ball_current_pos[1] - ball_previous_pos[1]) / steps 
+
+        for i in range(math.ceil(steps + 1)):
+            x = ball_previous_pos[0] + dx * i
+            y = ball_previous_pos[1] + dy * i
+            offset = (int(x - paddle_pos[0]), int(y - paddle_pos[1]))
+            collision_point = ball_mask.overlap(paddle_mask, offset)
+            print(offset, ball_mask, paddle_mask)
+            if collision_point:
+                escape_offset = 1
+                x -= dx * escape_offset
+                y -= dy * escape_offset
+                return int(x), int(y), collision_point, offset
+            
+        return ball_current_pos[0], ball_current_pos[1],  None, None 
+        """
+
+    def line_intersection(self, p1, p2, p3, p4):
+        x1, y1, x2, y2 = *p1, *p2
+        x3, y3, x4, y4 = *p3, *p4
+
+        denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+        if denom == 0:
+            return None  # Lines are parallel or coincident
+
+        px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom
+        py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom
+
+        if min(x1, x2) <= px <= max(x1, x2) and min(y1, y2) <= py <= max(y1, y2) and \
+        min(x3, x4) <= px <= max(x3, x4) and min(y3, y4) <= py <= max(y3, y4):
+            return px, py, x1, y1, x2, y2, x3, y3, x4, y4  # Intersection point
+
+        return None  # No intersection within the segments
 
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
 
 player1 = paddle(10, 150, 10, 100, (0, 255, 0))
 player2 = paddle(780, 150, 10, 100, (255, 0, 0))
-ball = Ball(400, 200, 20, 20, 45)
+ball = Ball(400, 200, 20, 20, 275)
 
 run = True
 while run:
