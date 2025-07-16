@@ -46,11 +46,11 @@ class ServerConnection:
                 break
 
 server = ServerConnection(12345)
-num_clients = 2 #int(input("How many connections wanted?\n>> "))
+num_clients = 1 #int(input("How many connections wanted?\n>> "))
 while len(server.connections) < num_clients:
     server.add_connection()
 print("Connections established. Server started. Ctrl+C to stop.\n")
-
+time.sleep(0.1)
 if __name__ == "__main__":
     try:
         while True:
