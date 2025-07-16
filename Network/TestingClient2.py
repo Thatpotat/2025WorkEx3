@@ -1,6 +1,7 @@
 import socket
 import threading
 import keyboard
+import time
 
 stopflag = False
 
@@ -38,5 +39,8 @@ try:
             s.sendall("0;".encode())
         if keyboard.is_pressed("-"):
             s.sendall("1;".encode())
+        if not (keyboard.is_pressed("=") or keyboard.is_pressed("-")):
+            s.sendall("2;".encode()) 
+        time.sleep(0.01)
 except KeyboardInterrupt:
     print("\nClient stopped.")
