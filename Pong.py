@@ -1,7 +1,6 @@
 import pygame
 import math
-
-
+import random
 
 pygame.init()
 
@@ -9,14 +8,12 @@ font = pygame.font.Font(None, 50)
 
 clock = pygame.time.Clock()
 
-fps = 10
+fps = 60
 
 screen_width = 800
 screen_height = 400
 
 screen = pygame.display.set_mode((screen_width, screen_height))
-
-speed = 5
 
 class paddle():
     def __init__(self, x, y, width ,height, colour):
@@ -28,15 +25,15 @@ class paddle():
         self.image.fill(colour)
         self.score = 0
         self.mask = pygame.mask.from_surface(self.image)
+        self.speed = 3
 
     def move(self, direction):
         if direction == 0:
-            self.y += speed
+            self.y += self.speed
             self.y = min(400 - self.height, self.y)
         elif direction == 1:
-            self.y -= speed
+            self.y -= self.speed
             self.y = max(0, self.y)
-        #self.rect.topleft = (self.x, self.y)
 
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
@@ -46,34 +43,66 @@ player2:paddle
 
 class Ball():
     def __init__(self, x, y, width, height, direction):
+        self.starting_pos = (x, y)
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.image = pygame.Surface((width, height))
-        self.speed = 10
+        self.speed = 5
         self.direction = direction
         self.image.fill((255, 255, 255))
         self.mask = pygame.mask.from_surface(self.image)
 
     def move(self):
         previous_pos  = (self.x, self.y)
-        self.x += math.sin(math.radians(self.direction)) * speed
-        self.y += math.cos(math.radians(self.direction)) * speed
-        current_pos = (self.x, self.y)
+        self.x += math.sin(math.radians(self.direction)) * self.speed
+        self.y += math.cos(math.radians(self.direction)) * self.speed
         faces = [
-            player1_front_face = ((player1.x + player1.width, player1.y), (player1.x + player1.width, player1.y + player1.height))
-            player1_back_face = ((player1.x, player1.y), (player1.x, player1.y + player1.height))
-            player2_back_face = ((player2.x + player2.width, player2.y), (player2.x + player2.width, player2.y + player2.height))
-            player2_front_face = ((player2.x, player2.y), (player2.x, player2.y + player2.height))
+            ((player1.x + player1.width, player1.y), (player1.x + player1.width, player1.y + player1.height)), # player1 front
+            ((player1.x, player1.y), (player1.x, player1.y + player1.height)), # player1 back
+            ((player2.x + player2.width, player2.y), (player2.x + player2.width, player2.y + player2.height)), # player2 back
+            ((player2.x, player2.y), (player2.x, player2.y + player2.height)) # player2 front
+        ]
+        vertices = [
+            (self.x, self.y), 
+            (self.x + self.width, self.y),
+            (self.x, self.y + self.height), 
+            (self.x + self.width, self.y + self.height)
         ]
         for face in faces:
-            intersection = self.line_intersection((previous_pos), face)
-        if intersection:
-            self.x, self.y = intersection[0], intersection[1]
-            print(f"Lines intersect at {intersection}")
-        else:
-            print("Lines do not intersect.")
+            for vertice in vertices:
+                intersection = self.line_intersection(previous_pos, vertice, face[0], face[1])
+                if intersection is not None:
+                    break
+            if intersection:
+                if face == faces[0]:
+                    self.x, self.y = intersection[0] + 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player1.y
+                    print(relative_y)
+                    deflection_weight = relative_y / player1.height * 2 - 1
+                    angle_offset = deflection_weight * 45
+                    self.direction =  - angle_offset - 90
+                elif face == faces[1]:
+                    self.x, self.y = intersection[0] + self.width + 1, intersection[1]
+                elif face == faces[2]:
+                    self.x, self.y = intersection[0] - 2 * self.width - 1, intersection[1]
+                else:
+                    self.x, self.y = intersection[0] - self.width - 1, intersection[1]
+                self.direction = 360 - self.direction
+        if self.y <= 0 or self.y + self.width >= 400:
+            self.direction = 180 - self.direction
+        
+
+        # point detection
+        if self.x + self.width <= 0 or self.x + self.width >= 800:
+            if self.x + self.width <= 0:
+                player2.score += 1
+            else:
+                player2.score += 1
+            self.x, self.y = self.starting_pos
+            self.direction = random.randint(1, 4) * 90 + 45
+
     def correct_exact_overlap(self, ball_previous_pos, ball_current_pos, paddle):
         """
         steps = max(abs(ball_current_pos[0] - ball_previous_pos[0]), abs(ball_current_pos[1] - ball_previous_pos[1]))   
@@ -117,9 +146,12 @@ class Ball():
         screen.blit(self.image, (self.x, self.y))
 
 def main():
+    global player1
+    global player2
+    global ball
     player1 = paddle(10, 150, 10, 100, (0, 255, 0))
     player2 = paddle(780, 150, 10, 100, (255, 0, 0))
-    ball = Ball(400, 200, 20, 20, 275)
+    ball = Ball(400, 200, 20, 20, 45)
 
     run = True
     while run:
@@ -132,6 +164,17 @@ def main():
         text = font.render(f"{player1.score} : {player2.score}", True, (255, 255, 255))
         text_rect = text.get_rect(center=(400, 20))
         screen.blit(text, text_rect)
+
+        # temporary controls
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP]:
+            player2.move(1)
+        if keys[pygame.K_DOWN]:
+            player2.move(0)
+        if keys[pygame.K_w]:
+            player1.move(1)
+        if keys[pygame.K_s]:
+            player1.move(0)
 
         player1.draw()
 
@@ -149,3 +192,4 @@ def parseInput(input:str):
         player1.move(input[1])
     elif input[0] == "1":
         player2.move(input[1])
+main()
