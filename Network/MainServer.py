@@ -5,7 +5,7 @@ import random
 import math
 
 # Optional: Enable display for debugging
-ENABLE_DISPLAY = True
+ENABLE_DISPLAY = False
 if ENABLE_DISPLAY:
     import pygame
 

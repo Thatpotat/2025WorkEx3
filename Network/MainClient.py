@@ -26,7 +26,7 @@ class Client:
                 # Parse and display game state
                 try:
                     p1x, p1y, p2x, p2y, bx, by, s1, s2 = map(float, buffer.split(","))
-                    print(f"\rP1:({p1x:.0f},{p1y:.0f})  P2:({p2x:.0f},{p2y:.0f})  Ball:({bx:.0f},{by:.0f})  Score:{int(s1)}:{int(s2)}", end="")
+                    print(f"\rP1:({p1x:.0f},{p1y:.0f})  P2:({p2x:.0f},{p2y:.0f})  Ball:({bx:.0f},{by:.0f})  Score:{int(s1)}:{int(s2)}           ", end="")
                 except Exception as e:
                     print(f"\nParse error: {e}")
                 buffer = ""
