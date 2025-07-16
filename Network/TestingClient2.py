@@ -2,45 +2,50 @@ import socket
 import threading
 import keyboard
 import time
+import sys
 
-stopflag = False
+class Client:
+    def __init__(self, host='localhost', port=12345):
+        self.host = host
+        self.port = port
+        self.sock = socket.socket()
+        self.stopflag = False
 
-def receive_messages(sock):
-    global stopflag
-    buffer = ""
-    while not stopflag:
+    def receive_messages(self):
+        buffer = ""
+        while not self.stopflag:
+            try:
+                char = self.sock.recv(1).decode()
+            except ConnectionResetError:
+                print("\nServer closed.")
+                self.stopflag = True
+                sys.exit()
+            if not char:
+                break
+            if char == ";":
+                print("\x1b[1A\x1b[2K" + buffer)
+                buffer = ""
+            else:
+                buffer += char
+
+    def run(self):
+        self.sock.connect((self.host, self.port))
+        threading.Thread(target=self.receive_messages, daemon=True).start()
+        print("Connected to server. Press Ctrl+C to stop.\n")
         try:
-            char = sock.recv(1).decode()
-        except ConnectionResetError:
-            print("\nServer closed.")
-            stopflag = True
-            exit()
-        if not char:
-            break
-        if char == ";":
-            print("\x1b[1A\x1b[2K"+buffer)
-            buffer = ""
-        else:
-            buffer += char
+            while True:
+                if self.stopflag:
+                    sys.exit()
+                if keyboard.is_pressed("up"):
+                    self.sock.sendall("0;".encode())
+                if keyboard.is_pressed("down"):
+                    self.sock.sendall("1;".encode())
+                if not (keyboard.is_pressed("up") or keyboard.is_pressed("down")):
+                    self.sock.sendall("2;".encode())
+                time.sleep(0.01)
+        except KeyboardInterrupt:
+            print("\nClient stopped.")
 
-s = socket.socket()
-s.connect(('localhost', 12345))
-
-# Start receiver in background
-threading.Thread(target=receive_messages, args=(s,), daemon=True).start()
-
-# Input loop to send data
-print("Connected to server. Press Ctrl+C to stop.\n")
-try:
-    while True:
-        if stopflag:
-            exit()
-        if keyboard.is_pressed("right_arrow"):
-            s.sendall("0;".encode())
-        if keyboard.is_pressed("left_arrow"):
-            s.sendall("1;".encode())
-        if not (keyboard.is_pressed("right_arrow") or keyboard.is_pressed("left_arrow")):
-            s.sendall("2;".encode()) 
-        time.sleep(0.01)
-except KeyboardInterrupt:
-    print("\nClient stopped.")
+if __name__ == "__main__":
+    client = Client()
+    client.run()
