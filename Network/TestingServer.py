@@ -1,9 +1,11 @@
 import socket
 import threading
 import time
+import random
 
 class ServerConnection:
     do_recv:bool
+    dat:str
     def __init__(self, port, limit = 2):
         self.do_recv = False
         self.lim = limit
@@ -53,6 +55,7 @@ class ServerConnection:
                     break
                 if char == ";":
                     print(f"\r\x1b[2K{connid},{buffer}", end="", flush=True)
+                    self.dat = buffer
                     buffer = ""
                 else:
                     buffer += char
@@ -65,6 +68,9 @@ class ServerConnection:
         except ValueError:
             pass
         conn.close()
+    
+    def get_dat(self):
+        return self.dat
 
 server = ServerConnection(12345, 2)
 print("Connections established. Server started. Ctrl+C to stop.\n")
@@ -72,7 +78,7 @@ time.sleep(0.1)
 if __name__ == "__main__":
     try:
         while True:
-            server.send_data("0,0,1,1,2,2")
+            server.send_data(f"{random.randint(0,9)},{random.randint(0,9)},{random.randint(0,9)},{random.randint(0,9)},{random.randint(0,9)},{random.randint(0,9)}")
             time.sleep(0.05)
     except KeyboardInterrupt:
         print("\nServer stopped.")

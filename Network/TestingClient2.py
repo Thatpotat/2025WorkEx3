@@ -35,11 +35,11 @@ try:
     while True:
         if stopflag:
             exit()
-        if keyboard.is_pressed("right"):
+        if keyboard.is_pressed("right_arrow"):
             s.sendall("0;".encode())
-        if keyboard.is_pressed("left"):
+        if keyboard.is_pressed("left_arrow"):
             s.sendall("1;".encode())
-        if not (keyboard.is_pressed("=") or keyboard.is_pressed("-")):
+        if not (keyboard.is_pressed("right_arrow") or keyboard.is_pressed("left_arrow")):
             s.sendall("2;".encode()) 
         time.sleep(0.01)
 except KeyboardInterrupt:
