@@ -93,6 +93,10 @@ class Ball:
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
                     self.direction =  - angle_offset - 90
+                player1.speed += 0.125
+                player2.speed += 0.125
+                player1.speed = min(player1.speed, 5)
+                player2.speed = min(player2.speed, 5)
                 self.speed += 0.25
                 self.speed = min(9, self.speed)
 
