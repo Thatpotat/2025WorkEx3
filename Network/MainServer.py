@@ -139,6 +139,7 @@ class Ball:
 
 class PongServer:
     def __init__(self, port=12345, limit=2):
+        self.limit = limit
         self.sock = socket.socket()
         self.sock.bind(('', port))
         self.sock.listen(limit)
@@ -221,10 +222,10 @@ class PongServer:
                 time.sleep(1/fps)
 
     def run(self):
-        print("Waiting for 2 clients...")
+        print(f"Waiting for {self.limit} clients...")
 
         def accept_clients():
-            while len(self.connections) < 2:
+            while len(self.connections) < self.limit:
                 conn, addr = self.sock.accept()
                 print(f"Connected by {addr}")
                 self.connections.append(conn)
@@ -234,9 +235,11 @@ class PongServer:
         accept_thread.start()
 
         # Wait for both clients to connect before starting the game loop
-        while len(self.connections) < 2:
+        while len(self.connections) < self.limit:
+            if ENABLE_DISPLAY:
+                pygame.event.pump()
             time.sleep(0.1)
-        print("Both clients connected. Starting game.")
+        print(f"{self.limit} clients connected. Starting game.")
 
         # Run the game loop in the main thread (fixes display freezing)
         try:
