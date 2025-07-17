@@ -64,7 +64,6 @@ class Client:
         self.s2 = 0
 
         # Pygame setup (borderless fullscreen)
-        pygame.init()
         self.screen = pygame.display.set_mode((self.display_width, self.display_height), pygame.NOFRAME)
         pygame.display.set_caption("Pong Client")
         self.clock = pygame.time.Clock()

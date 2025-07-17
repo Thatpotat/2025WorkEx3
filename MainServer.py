@@ -108,11 +108,15 @@ class Ball:
                 self.y = 400 - self.height - 1
 
         # point detection
-        if self.x + self.width <= 0 or self.x >= 800:
-            if self.x + self.width <= 0:
-                player2.score += 1
-            else:
-                player1.score += 1
+        
+        player1_scored = self.x >= 800
+        player2_scored = self.x + self.width <= 0
+
+        if player1_scored:
+            player1.score += 1
+        elif player2_scored:
+            player2.score += 1
+        if player1_scored or player2_scored:
             self.x, self.y = self.starting_pos
             self.direction = random.randint(1, 4) * 90 + 45
             self.speed = 5
