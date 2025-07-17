@@ -5,7 +5,7 @@ import random
 import math
 
 # Optional: Enable display for debugging
-ENABLE_DISPLAY = True
+ENABLE_DISPLAY = False
 if ENABLE_DISPLAY:
     import pygame
 
@@ -251,5 +251,5 @@ class PongServer:
             pygame.quit()
 
 if __name__ == "__main__":
-    server = PongServer(limit=2)
+    server = PongServer(limit=1)
     server.run()
