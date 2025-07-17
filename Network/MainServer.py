@@ -116,6 +116,23 @@ class Ball:
             self.direction = random.randint(1, 4) * 90 + 45
             self.speed = 5
 
+    def line_intersection(self, p1, p2, p3, p4):
+        x1, y1, x2, y2 = *p1, *p2
+        x3, y3, x4, y4 = *p3, *p4
+
+        denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+        if denom == 0:
+            return None  # Lines are parallel or coincident
+
+        px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom
+        py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom
+
+        if min(x1, x2) <= px <= max(x1, x2) and min(y1, y2) <= py <= max(y1, y2) and \
+        min(x3, x4) <= px <= max(x3, x4) and min(y3, y4) <= py <= max(y3, y4):
+            return px, py, x1, y1, x2, y2, x3, y3, x4, y4  # Intersection point
+
+        return None  # No intersection within the segments
+
     def draw(self, screen):
         if ENABLE_DISPLAY:
             screen.blit(self.image, (self.x, self.y))
