@@ -3,8 +3,51 @@ import threading
 import keyboard
 import time
 import sys
+import math
 
 import pygame
+
+pygame.init()
+
+font = pygame.font.Font(None, 50)
+
+screen_width = 800
+screen_height = 400
+screen = pygame.display.set_mode((screen_width, screen_height))
+
+class paddle:
+    def __init__(self, x, y, width, height, colour):
+        self.y = y
+        self.x = x
+        self.width = width
+        self.height = height
+        self.score = 0
+        self.speed = 3
+        self.image = pygame.Surface((width, height))
+        self.image.fill(colour)
+        self.colour = colour
+
+    def draw(self):
+        screen.blit(self.image, (self.x, self.y))
+
+class Ball:
+    def __init__(self, x, y, width, height, direction):
+        self.starting_pos = (x, y)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.speed = 5
+        self.direction = direction
+        self.image = pygame.Surface((width, height))
+        self.image.fill((255, 255, 255))
+
+    def draw(self):
+        screen.blit(self.image, (self.x, self.y))
+
+player1 = paddle(10, 150, 11, 100, (0, 255, 0))
+player2 = paddle(780, 150, 11, 100, (255, 0, 0))
+ball = Ball(400, 200, 20, 20, 45)
 
 class Client:
     def __init__(self, host='localhost', port=12345):
@@ -85,8 +128,30 @@ class Client:
                     self.sock.sendall("0;".encode())
                 else:
                     self.sock.sendall("2;".encode())
-                self.draw()
+                #self.draw()
+                screen.fill((3, 161, 252))
+
+                player1.x = self.p1x
+                player1.y = self.p1y
+                player2.x = self.p2x
+                player2.y = self.p2y
+                ball.x = self.bx
+                ball.y = self.by
+                player1.score = self.s1
+                player2.score = self.s2
+
+                player1.draw()
+
+                player2.draw()
+
+                ball.draw()
+
+                text = self.font.render(f"{int(player1.score)} : {int(player2.score)}", True, (255, 255, 255))
+                text_rect = text.get_rect(center=(400, 20))
+                self.screen.blit(text, text_rect)
+
                 self.clock.tick(60)
+                pygame.display.update()
         except KeyboardInterrupt:
             print("\nClient stopped.")
             pygame.quit()
