@@ -208,7 +208,7 @@ class PongServer:
             player1.move(p1_input)
             self.ball.move()
             self.broadcast_state()
-            print(f"\rP1:({player1.x:.0f},{player1.y:.0f})  P2:({player2.x:.0f},{player2.y:.0f})  Ball:({self.ball.x:.0f},{self.ball.y:.0f})  Score:{int(player1.score)}:{int(player2.score)}           ", end="", flush=True)
+            #print(f"\rP1:({player1.x:.0f},{player1.y:.0f})  P2:({player2.x:.0f},{player2.y:.0f})  Ball:({self.ball.x:.0f},{self.ball.y:.0f})  Score:{int(player1.score)}:{int(player2.score)}           ", end="", flush=True)
 
             if ENABLE_DISPLAY:
                 for event in pygame.event.get():
