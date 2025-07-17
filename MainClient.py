@@ -9,12 +9,6 @@ import pygame
 
 pygame.init()
 
-font = pygame.font.Font(None, 50)
-
-screen_width = 800
-screen_height = 400
-screen = pygame.display.set_mode((screen_width, screen_height))
-
 class paddle:
     def __init__(self, x, y, width, height, colour):
         self.y = y
@@ -23,12 +17,7 @@ class paddle:
         self.height = height
         self.score = 0
         self.speed = 3
-        self.image = pygame.Surface((width, height))
-        self.image.fill(colour)
         self.colour = colour
-
-    def draw(self):
-        screen.blit(self.image, (self.x, self.y))
 
 class Ball:
     def __init__(self, x, y, width, height, direction):
@@ -39,11 +28,6 @@ class Ball:
         self.height = height
         self.speed = 5
         self.direction = direction
-        self.image = pygame.Surface((width, height))
-        self.image.fill((255, 255, 255))
-
-    def draw(self):
-        screen.blit(self.image, (self.x, self.y))
 
 player1 = paddle(10, 150, 11, 100, (0, 255, 0))
 player2 = paddle(780, 150, 11, 100, (255, 0, 0))
@@ -56,6 +40,19 @@ class Client:
         self.sock = socket.socket()
         self.stopflag = False
 
+        # Get display info for scaling
+        info = pygame.display.Info()
+        self.display_width = info.current_w
+        self.display_height = info.current_h
+
+        # Reference game resolution
+        self.ref_width = 800
+        self.ref_height = 400
+
+        # Calculate scale factors
+        self.scale_x = self.display_width / self.ref_width
+        self.scale_y = self.display_height / self.ref_height
+
         # Game state variables
         self.p1x = 10
         self.p1y = 150
@@ -66,12 +63,12 @@ class Client:
         self.s1 = 0
         self.s2 = 0
 
-        # Pygame setup
+        # Pygame setup (borderless fullscreen)
         pygame.init()
-        self.screen = pygame.display.set_mode((800, 400))
+        self.screen = pygame.display.set_mode((self.display_width, self.display_height), pygame.NOFRAME)
         pygame.display.set_caption("Pong Client")
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, 50)
+        self.font = pygame.font.Font(None, int(50 * self.scale_y))
 
     def receive_messages(self):
         buffer = ""
@@ -97,13 +94,22 @@ class Client:
     def draw(self):
         self.screen.fill((3, 161, 252))
         # Draw paddles
-        pygame.draw.rect(self.screen, (0, 255, 0), (self.p1x, self.p1y, 11, 100))
-        pygame.draw.rect(self.screen, (255, 0, 0), (self.p2x, self.p2y, 11, 100))
+        pygame.draw.rect(
+            self.screen, player1.colour,
+            (self.p1x * self.scale_x, self.p1y * self.scale_y, player1.width * self.scale_x, player1.height * self.scale_y)
+        )
+        pygame.draw.rect(
+            self.screen, player2.colour,
+            (self.p2x * self.scale_x, self.p2y * self.scale_y, player2.width * self.scale_x, player2.height * self.scale_y)
+        )
         # Draw ball
-        pygame.draw.rect(self.screen, (255, 255, 255), (self.bx, self.by, 20, 20))
+        pygame.draw.rect(
+            self.screen, (255, 255, 255),
+            (self.bx * self.scale_x, self.by * self.scale_y, ball.width * self.scale_x, ball.height * self.scale_y)
+        )
         # Draw score
         text = self.font.render(f"{int(self.s1)} : {int(self.s2)}", True, (255, 255, 255))
-        text_rect = text.get_rect(center=(400, 20))
+        text_rect = text.get_rect(center=(self.display_width // 2, int(20 * self.scale_y)))
         self.screen.blit(text, text_rect)
         pygame.display.update()
 
@@ -115,47 +121,23 @@ class Client:
             while True:
                 if self.stopflag:
                     sys.exit()
-                # Handle quit event
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.stopflag = True
                         pygame.quit()
                         sys.exit()
-                # 0 = down, 1 = up, 2 = none
                 if keyboard.is_pressed("up"):
                     self.sock.sendall("1;".encode())
                 elif keyboard.is_pressed("down"):
                     self.sock.sendall("0;".encode())
                 else:
                     self.sock.sendall("2;".encode())
-                #self.draw()
-                screen.fill((3, 161, 252))
-
-                player1.x = self.p1x
-                player1.y = self.p1y
-                player2.x = self.p2x
-                player2.y = self.p2y
-                ball.x = self.bx
-                ball.y = self.by
-                player1.score = self.s1
-                player2.score = self.s2
-
-                player1.draw()
-
-                player2.draw()
-
-                ball.draw()
-
-                text = self.font.render(f"{int(player1.score)} : {int(player2.score)}", True, (255, 255, 255))
-                text_rect = text.get_rect(center=(400, 20))
-                self.screen.blit(text, text_rect)
-
+                self.draw()
                 self.clock.tick(60)
-                pygame.display.update()
         except KeyboardInterrupt:
             print("\nClient stopped.")
             pygame.quit()
 
 if __name__ == "__main__":
-    client = Client(host="192.168.55.8")
+    client = Client(host="localhost")
     client.run()
