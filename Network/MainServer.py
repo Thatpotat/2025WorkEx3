@@ -198,7 +198,7 @@ class PongServer:
                 p1_input = self.inputs[0]
                 p2_input = self.inputs[1]
             player1.move(p1_input)
-            player2.move(p2_input)
+            player2.move(p2_input if p2_input == 2 else 1 - p2_input)
             self.ball.move()
             self.broadcast_state()
             print(f"\rP1:({player1.x:.0f},{player1.y:.0f})  P2:({player2.x:.0f},{player2.y:.0f})  Ball:({self.ball.x:.0f},{self.ball.y:.0f})  Score:{int(player1.score)}:{int(player2.score)}           ", end="")
