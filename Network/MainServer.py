@@ -23,10 +23,10 @@ class paddle:
             self.colour = colour
 
     def move(self, direction):
-        if direction == 0:  # down
+        if direction == 1:  # down
             self.y += self.speed
             self.y = min(400 - self.height, self.y)
-        elif direction == 1:  # up
+        elif direction == 0:  # up
             self.y -= self.speed
             self.y = max(0, self.y)
 
@@ -251,5 +251,5 @@ class PongServer:
             pygame.quit()
 
 if __name__ == "__main__":
-    server = PongServer()
+    server = PongServer(limit=1)
     server.run()
