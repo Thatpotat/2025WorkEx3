@@ -71,27 +71,24 @@ class Ball:
             if intersection:
                 if face == faces[0]:
                     self.x, self.y = intersection[0] + 1, intersection[1]
-                    relative_y = (self.y + (self.width / 2)) - player1.y
-                    
+                    relative_y = (self.y + (self.width / 2)) - player1.y                  
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
                     self.direction =  angle_offset + 90
                 elif face == faces[1]:
-                    self.x, self.y = intersection[0] + self.width + 1, intersection[1]
-                    relative_y = (self.y + (self.width / 2)) - player1.y
-                    
+                    self.x, self.y = intersection[0] + (face[1][1] - face[0][1]) + 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player1.y                   
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
                     self.direction =  angle_offset + 90
                 elif face == faces[2]:
-                    self.x, self.y = intersection[0] - 2 * self.width - 1, intersection[1]
-                    relative_y = (self.y + (self.width / 2)) - player2.y
-                    
+                    self.x, self.y = intersection[0] - self.width - (face[1][1] - face[0][1]) - 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player2.y                   
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
                     self.direction =  - angle_offset - 90 
                 else:
-                    self.x, self.y = intersection[0] - self.width - 1, intersection[1]
+                    self.x, self.y = intersection[0] - (face[1][1] - face[0][1]) - 1, intersection[1]
                     relative_y = (self.y + (self.width / 2)) - player2.y
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
