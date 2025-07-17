@@ -9,7 +9,7 @@ ENABLE_DISPLAY = False
 if ENABLE_DISPLAY:
     import pygame
 
-class paddle:
+class Paddle:
     def __init__(self, x, y, width, height, colour):
         self.y = y
         self.x = x
@@ -153,8 +153,8 @@ class PongServer:
 
         # Game objects
         global player1, player2
-        player1 = paddle(10, 150, 11, 100, (0, 255, 0))
-        player2 = paddle(780, 150, 11, 100, (255, 0, 0))
+        player1 = Paddle(10, 150, 11, 100, (0, 255, 0))
+        player2 = Paddle(780, 150, 11, 100, (255, 0, 0))
         self.ball = Ball(400, 200, 20, 20, 45)
 
         if ENABLE_DISPLAY:

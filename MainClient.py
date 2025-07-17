@@ -9,7 +9,7 @@ import pygame
 
 pygame.init()
 
-class paddle:
+class Paddle:
     def __init__(self, x, y, width, height, colour):
         self.y = y
         self.x = x
@@ -29,8 +29,8 @@ class Ball:
         self.speed = 5
         self.direction = direction
 
-player1 = paddle(10, 150, 11, 100, (0, 255, 0))
-player2 = paddle(780, 150, 11, 100, (255, 0, 0))
+player1 = Paddle(10, 150, 11, 100, (0, 255, 0))
+player2 = Paddle(780, 150, 11, 100, (255, 0, 0))
 ball = Ball(400, 200, 20, 20, 45)
 
 class Client:
@@ -93,7 +93,7 @@ class Client:
 
     def draw(self):
         self.screen.fill((3, 161, 252))
-        # Draw paddles
+        # Draw Paddles
         pygame.draw.rect(
             self.screen, player1.colour,
             (self.p1x * self.scale_x, self.p1y * self.scale_y, player1.width * self.scale_x, player1.height * self.scale_y)
