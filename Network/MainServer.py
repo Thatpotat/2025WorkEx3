@@ -72,21 +72,21 @@ class Ball:
                 if face == faces[0]:
                     self.x, self.y = intersection[0] + 1, intersection[1]
                     relative_y = (self.y + (self.width / 2)) - player1.y
-                    print(relative_y)
+                    
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
                     self.direction =  angle_offset + 90
                 elif face == faces[1]:
                     self.x, self.y = intersection[0] + self.width + 1, intersection[1]
                     relative_y = (self.y + (self.width / 2)) - player1.y
-                    print(relative_y)
+                    
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
                     self.direction =  angle_offset + 90
                 elif face == faces[2]:
                     self.x, self.y = intersection[0] - 2 * self.width - 1, intersection[1]
                     relative_y = (self.y + (self.width / 2)) - player2.y
-                    print(relative_y)
+                    
                     deflection_weight = relative_y / player1.height * 2 - 1
                     angle_offset = deflection_weight * 45
                     self.direction =  - angle_offset - 90 
