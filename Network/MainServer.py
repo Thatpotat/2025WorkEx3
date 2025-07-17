@@ -23,10 +23,10 @@ class paddle:
             self.colour = colour
 
     def move(self, direction):
-        if direction == 0:  # down
+        if direction == 1:  # down
             self.y += self.speed
             self.y = min(400 - self.height, self.y)
-        elif direction == 1:  # up
+        elif direction == 0:  # up
             self.y -= self.speed
             self.y = max(0, self.y)
 
@@ -150,8 +150,8 @@ class PongServer:
 
         # Game objects
         global player1, player2
-        player1 = paddle(10, 150, 10, 100, (0, 255, 0))
-        player2 = paddle(780, 150, 10, 100, (255, 0, 0))
+        player1 = paddle(10, 150, 11, 100, (0, 255, 0))
+        player2 = paddle(780, 150, 11, 100, (255, 0, 0))
         self.ball = Ball(400, 200, 20, 20, 45)
 
         if ENABLE_DISPLAY:
@@ -197,8 +197,8 @@ class PongServer:
             with self.inputs_lock:
                 p1_input = self.inputs[0]
                 p2_input = self.inputs[1]
-            player1.move(p1_input)
-            player2.move(p2_input if p2_input == 2 else 1 - p2_input)
+            player2.move(p2_input)
+            player1.move(p1_input if p1_input == 2 else 1 - p1_input)
             self.ball.move()
             self.broadcast_state()
             print(f"\rP1:({player1.x:.0f},{player1.y:.0f})  P2:({player2.x:.0f},{player2.y:.0f})  Ball:({self.ball.x:.0f},{self.ball.y:.0f})  Score:{int(player1.score)}:{int(player2.score)}           ", end="")
