@@ -97,7 +97,7 @@ class Ball:
                     angle_offset = deflection_weight * 45
                     self.direction =  - angle_offset - 90
                 self.speed += 0.25
-                self.speed = min(10, self.speed)
+                self.speed = min(9, self.speed)
 
         if self.y <= 0 or self.y + self.height >= 400:
             self.direction = 180 - self.direction
