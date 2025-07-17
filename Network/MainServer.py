@@ -107,7 +107,7 @@ class Ball:
                 self.y = 400 - self.height - 1
 
         # point detection
-        if self.x + self.width <= 0 or self.x + self.width >= 800:
+        if self.x + self.width <= 0 or self.x >= 800:
             if self.x + self.width <= 0:
                 player2.score += 1
             else:
