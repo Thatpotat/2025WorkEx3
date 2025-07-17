@@ -116,6 +116,8 @@ class Ball:
             self.x, self.y = self.starting_pos
             self.direction = random.randint(1, 4) * 90 + 45
             self.speed = 5
+            player1.speed = 3
+            player2.speed = 3
 
     def line_intersection(self, p1, p2, p3, p4):
         x1, y1, x2, y2 = *p1, *p2
