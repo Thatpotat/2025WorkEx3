@@ -48,47 +48,73 @@ class Ball:
             self.image.fill((255, 255, 255))
 
     def move(self):
-        global player1, player2
-        prev_x, prev_y = self.x, self.y
+        previous_pos  = (self.x, self.y)
         self.x += math.sin(math.radians(self.direction)) * self.speed
         self.y += math.cos(math.radians(self.direction)) * self.speed
+        faces = [
+            ((player1.x + player1.width, player1.y), (player1.x + player1.width, player1.y + player1.height)), # player1 front
+            ((player1.x, player1.y), (player1.x, player1.y + player1.height)), # player1 back
+            ((player2.x + player2.width, player2.y), (player2.x + player2.width, player2.y + player2.height)), # player2 back
+            ((player2.x, player2.y), (player2.x, player2.y + player2.height)),  # player2 front
+        ]
+        vertices = [
+            (self.x, self.y), 
+            (self.x + self.width, self.y),
+            (self.x, self.y + self.height), 
+            (self.x + self.width, self.y + self.height)
+        ]
+        for face in faces:
+            for vertice in vertices:
+                intersection = self.line_intersection(previous_pos, vertice, face[0], face[1])
+                if intersection is not None:
+                    break
+            if intersection:
+                if face == faces[0]:
+                    self.x, self.y = intersection[0] + 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player1.y
+                    print(relative_y)
+                    deflection_weight = relative_y / player1.height * 2 - 1
+                    angle_offset = deflection_weight * 45
+                    self.direction =  angle_offset + 90
+                elif face == faces[1]:
+                    self.x, self.y = intersection[0] + self.width + 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player1.y
+                    print(relative_y)
+                    deflection_weight = relative_y / player1.height * 2 - 1
+                    angle_offset = deflection_weight * 45
+                    self.direction =  angle_offset + 90
+                elif face == faces[2]:
+                    self.x, self.y = intersection[0] - 2 * self.width - 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player2.y
+                    print(relative_y)
+                    deflection_weight = relative_y / player1.height * 2 - 1
+                    angle_offset = deflection_weight * 45
+                    self.direction =  - angle_offset - 90 
+                else:
+                    self.x, self.y = intersection[0] - self.width - 1, intersection[1]
+                    relative_y = (self.y + (self.width / 2)) - player2.y
+                    deflection_weight = relative_y / player1.height * 2 - 1
+                    angle_offset = deflection_weight * 45
+                    self.direction =  - angle_offset - 90
+                self.speed += 0.25
+                self.speed = min(10, self.speed)
 
-        # Paddle collision
-        # Player 1
-        if (self.x <= player1.x + player1.width and
-            player1.y < self.y + self.height and
-            self.y < player1.y + player1.height):
-            self.x = player1.x + player1.width
-            relative_y = (self.y + (self.width / 2)) - player1.y
-            deflection_weight = relative_y / player1.height * 2 - 1
-            angle_offset = deflection_weight * 45
-            self.direction = -angle_offset - 90
-            self.direction = 360 - self.direction
-
-        # Player 2
-        if (self.x + self.width >= player2.x and
-            player2.y < self.y + self.height and
-            self.y < player2.y + player2.height):
-            self.x = player2.x - self.width
-            relative_y = (self.y + (self.width / 2)) - player2.y
-            deflection_weight = relative_y / player2.height * 2 - 1
-            angle_offset = deflection_weight * 45
-            self.direction = angle_offset + 90
-            self.direction = 360 - self.direction
-
-        # Wall collision
-        if self.y <= 0 or self.y + self.width >= 400:
+        if self.y <= 0 or self.y + self.height >= 400:
             self.direction = 180 - self.direction
+            if self.y <= 0:
+                self.y = 1
+            else:
+                self.y = 400 - self.height - 1
 
-        # Point detection
-        if self.x + self.width <= 0:
-            player2.score += 1
+        # point detection
+        if self.x + self.width <= 0 or self.x + self.width >= 800:
+            if self.x + self.width <= 0:
+                player2.score += 1
+            else:
+                player1.score += 1
             self.x, self.y = self.starting_pos
-            self.direction = random.choice([45, 135, 225, 315])
-        elif self.x >= 800:
-            player1.score += 1
-            self.x, self.y = self.starting_pos
-            self.direction = random.choice([45, 135, 225, 315])
+            self.direction = random.randint(1, 4) * 90 + 45
+            self.speed = 5
 
     def draw(self, screen):
         if ENABLE_DISPLAY:
