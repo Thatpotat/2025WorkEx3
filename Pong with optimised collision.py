@@ -59,23 +59,17 @@ class Ball():
         current_pos = (self.x, self.y)
         players = [player1, player2]
         for player in players:
-            self.x, self.y, collision_point  = self.correct_exact_overlap(self.mask, current_pos, previous_pos, player.mask, (player.x, player.y))
+            self.x, self.y, collision_point, offset = self.correct_exact_overlap(self.mask, current_pos, previous_pos, player.mask, (player.x, player.y))
             current_pos = (self.x, self.y)
             print(self.x, self.y)
             if collision_point:
-                if self.y + self.radius >= player.y and self.y <= player.y + player.height:
-                    if player == players[0]:
-                        self.direction = self.deflect_ball_from_paddle(player1.height, player1.y, max_deflection=-45)
-                    else:
-                        self.direction = self.deflect_ball_from_paddle(player2.height, player2.y, base_angle=270)
+                if player == players[0]:
+                    self.direction = self.deflect_ball_from_paddle(collision_point, player1.height, player1.y)
                 else:
-                    self.direction = 180 - self.direction
+                    self.direction = self.deflect_ball_from_paddle(collision_point, player2.height, player2.y, base_angle=270)
 
-        hit_top = self.y <= 0
-        hit_bottom = self.y + self.radius * 2 >= 400
-
-        if hit_top or hit_bottom:
-            self.direction = 180 - self.direction
+    def draw(self):
+        screen.blit(self.image, (self.x, self.y))
 
     def correct_exact_overlap(self, ball_mask, ball_current_pos, ball_previous_pos, paddle_mask, paddle_pos):
 
@@ -98,15 +92,15 @@ class Ball():
                 escape_offset = 1
                 x -= dx * escape_offset
                 y -= dy * escape_offset
-                return int(x), int(y), collision_point
+                return int(x), int(y), collision_point, offset
             
-        return ball_current_pos[0], ball_current_pos[1], None
+        return ball_current_pos[0], ball_current_pos[1], None, None
 
-    def deflect_ball_from_paddle(self, paddle_height, paddle_y, base_angle=90, max_deflection=45):
+    def deflect_ball_from_paddle(self, collision_point, paddle_height, paddle_y, base_angle=90, max_deflection=45):
 
-        angle_offset_weight = ((self.y + self.radius - paddle_y) / paddle_height) * 2 - 1
+        angle_offset_weight = ((collision_point[1] + self.y - paddle_y) / paddle_height) * 2 - 1
 
-        angle_offset = angle_offset_weight * max_deflection
+        angle_offset = -angle_offset_weight * max_deflection
 
         print(angle_offset)
         #breakpoint()
@@ -114,13 +108,10 @@ class Ball():
         new_angle = base_angle + angle_offset
 
         return new_angle
-    
-    def draw(self):
-        screen.blit(self.image, (self.x, self.y))
 
 player1 = player1 = paddle(10, 150, 10, 100, (0, 255, 0))
 player2 = paddle(780, 150, 10, 100, (255, 0, 0))
-ball = Ball(screen_width / 2, screen_height / 2, 45, 10)
+ball = Ball(screen_width / 2, screen_height / 2, -90, 10)
 
 run = True
 while run:
