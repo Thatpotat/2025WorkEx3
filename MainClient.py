@@ -2,7 +2,6 @@ import socket
 import threading
 import keyboard
 import sys
-
 import pygame
 
 pygame.init()
