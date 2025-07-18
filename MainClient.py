@@ -1,9 +1,7 @@
 import socket
 import threading
 import keyboard
-import time
 import sys
-import math
 
 import pygame
 
@@ -138,5 +136,5 @@ class Client:
             pygame.quit()
 
 if __name__ == "__main__":
-    client = Client(host="localhost")
+    client = Client(host="192.168.55.8")
     client.run()
