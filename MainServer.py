@@ -258,5 +258,5 @@ class PongServer:
             pygame.quit()
 
 if __name__ == "__main__":
-    server = PongServer(limit=1)
+    server = PongServer(limit=2)
     server.run()
