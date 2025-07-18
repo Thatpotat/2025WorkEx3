@@ -6,17 +6,22 @@ import math
 
 # Optional: Enable display for debugging
 ENABLE_DISPLAY = False
-if ENABLE_DISPLAY:
-    import pygame
+import pygame
 
 class Paddle:
     def __init__(self, x, y, width, height, colour):
-        self.y = y
         self.x = x
+        self.y = y
         self.width = width
         self.height = height
-        self.score = 0
+        self.image = pygame.Surface((width, height))
+        self.image.fill((colour))
+        #self.mask = pygame.mask.from_surface(self.image)
         self.speed = 3
+        self.mask_surface = pygame.Surface((width + 2, height + 2))
+        self.mask_surface.fill((255, 255, 255))
+        self.mask = pygame.mask.from_surface(self.mask_surface)
+        self.score = 0
         if ENABLE_DISPLAY:
             self.image = pygame.Surface((width, height))
             self.image.fill(colour)
@@ -34,111 +39,80 @@ class Paddle:
         if ENABLE_DISPLAY:
             screen.blit(self.image, (self.x, self.y))
 
-class Ball:
-    def __init__(self, x, y, width, height, direction):
-        self.starting_pos = (x, y)
+class Ball():
+    def __init__(self, x, y, direction, radius):
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
-        self.speed = 5
+        self.radius = radius
+        self.diameter = self.radius * 2
+        self.image = pygame.Surface((self.diameter, self.diameter), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, (255, 255, 255), (radius, radius), radius)
+        self.mask = pygame.mask.from_surface(self.image)
         self.direction = direction
-        if ENABLE_DISPLAY:
-            self.image = pygame.Surface((width, height))
-            self.image.fill((255, 255, 255))
+        self.speed = 5
 
     def move(self):
-        previous_pos  = (self.x, self.y)
+        previous_pos = (self.x, self.y)
         self.x += math.sin(math.radians(self.direction)) * self.speed
-        self.y += math.cos(math.radians(self.direction)) * self.speed
-        faces = [
-            ((player1.x + player1.width, player1.y), (player1.x + player1.width, player1.y + player1.height)), # player1 front
-            ((player1.x, player1.y), (player1.x, player1.y + player1.height)), # player1 back
-            ((player2.x + player2.width, player2.y), (player2.x + player2.width, player2.y + player2.height)), # player2 back
-            ((player2.x, player2.y), (player2.x, player2.y + player2.height)),  # player2 front
-        ]
-        vertices = [
-            (self.x, self.y), 
-            (self.x + self.width, self.y),
-            (self.x, self.y + self.height), 
-            (self.x + self.width, self.y + self.height)
-        ]
-        for face in faces:
-            for vertice in vertices:
-                intersection = self.line_intersection(previous_pos, vertice, face[0], face[1])
-                if intersection is not None:
-                    break
-            if intersection:
-                if face == faces[0]:
-                    self.x, self.y = intersection[0] + 1, intersection[1]
-                    relative_y = (self.y + (self.width / 2)) - player1.y                  
-                    deflection_weight = relative_y / player1.height * 2 - 1
-                    angle_offset = deflection_weight * 45
-                    self.direction =  angle_offset + 90
-                elif face == faces[1]:
-                    self.x, self.y = intersection[0] + player1.width + 1, intersection[1]
-                    relative_y = (self.y + (self.width / 2)) - player1.y                   
-                    deflection_weight = relative_y / player1.height * 2 - 1
-                    angle_offset = deflection_weight * 45
-                    self.direction =  angle_offset + 90
-                elif face == faces[2]:
-                    self.x, self.y = intersection[0] - self.width - player2.width  - 1, intersection[1]
-                    relative_y = (self.y + (self.width / 2)) - player2.y                   
-                    deflection_weight = relative_y / player1.height * 2 - 1
-                    angle_offset = deflection_weight * 45
-                    self.direction =  - angle_offset - 90 
+        self.y -= math.cos(math.radians(self.direction)) * self.speed
+        current_pos = (self.x, self.y)
+        players = [player1, player2]
+        for player in players:
+            self.x, self.y, collision_point  = self.correct_exact_overlap(self.mask, current_pos, previous_pos, player.mask, (player.x, player.y))
+            current_pos = (self.x, self.y)
+            print(self.x, self.y)
+            if collision_point:
+                if self.y + self.radius >= player.y and self.y <= player.y + player.height:
+                    if player == players[0]:
+                        self.direction = self.deflect_ball_from_paddle(player1.height, player1.y, max_deflection=-45)
+                    else:
+                        self.direction = self.deflect_ball_from_paddle(player2.height, player2.y, base_angle=270)
                 else:
-                    self.x, self.y = intersection[0] - self.width - 1, intersection[1]
-                    relative_y = (self.y + (self.width / 2)) - player2.y
-                    deflection_weight = relative_y / player1.height * 2 - 1
-                    angle_offset = deflection_weight * 45
-                    self.direction =  - angle_offset - 90
-                player1.speed += 0.125
-                player2.speed += 0.125
-                player1.speed = min(player1.speed, 5)
-                player2.speed = min(player2.speed, 5)
-                self.speed += 0.25
-                self.speed = min(9, self.speed)
-
-        if self.y <= 0 or self.y + self.height >= 400:
-            self.direction = 180 - self.direction
-            if self.y <= 0:
-                self.y = 1
-            else:
-                self.y = 400 - self.height - 1
-
-        # point detection
+                    self.direction = 180 - self.direction
         
-        player1_scored = self.x >= 800
-        player2_scored = self.x + self.width <= 0
+        hit_top = self.y <= 0
+        hit_bottom = self.y + self.radius * 2 >= 400
 
-        if player1_scored:
-            player1.score += 1
-        elif player2_scored:
-            player2.score += 1
-        if player1_scored or player2_scored:
-            self.x, self.y = self.starting_pos
-            self.direction = random.randint(1, 4) * 90 + 45
-            self.speed = 5
-            player1.speed = 3
-            player2.speed = 3
+        if hit_top or hit_bottom:
+            self.direction = 180 - self.direction
 
-    def line_intersection(self, p1, p2, p3, p4):
-        x1, y1, x2, y2 = *p1, *p2
-        x3, y3, x4, y4 = *p3, *p4
+    def correct_exact_overlap(self, ball_mask, ball_current_pos, ball_previous_pos, paddle_mask, paddle_pos):
 
-        denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
-        if denom == 0:
-            return None  # Lines are parallel or coincident
+        steps = max(abs(ball_current_pos[0] - ball_previous_pos[0]), abs(ball_current_pos[1] - ball_previous_pos[1]))
 
-        px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom
-        py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom
+        if steps == 0:
+            return ball_current_pos[0], ball_current_pos[1], None, None
 
-        if min(x1, x2) <= px <= max(x1, x2) and min(y1, y2) <= py <= max(y1, y2) and \
-        min(x3, x4) <= px <= max(x3, x4) and min(y3, y4) <= py <= max(y3, y4):
-            return px, py, x1, y1, x2, y2, x3, y3, x4, y4  # Intersection point
+        dx = (ball_current_pos[0] - ball_previous_pos[0]) / steps
+        dy = (ball_current_pos[1] - ball_previous_pos[1]) / steps
 
-        return None  # No intersection within the segments
+        for i in range(math.ceil(steps + 1)):
+            x = ball_previous_pos[0] + dx * i
+            y = ball_previous_pos[1] + dy * i
+            offset = ((int(paddle_pos[0] - 1) - x), int((paddle_pos[1] - 1) - y))
+            collision_point = ball_mask.overlap(paddle_mask, offset) # offset is the vector from the calling mask to the other mask
+            if collision_point:
+                #breakpoint()  # Triggers debugger if collision occurs
+                print("collision detected")
+                escape_offset = 1
+                x -= dx * escape_offset
+                y -= dy * escape_offset
+                return int(x), int(y), collision_point
+            
+        return ball_current_pos[0], ball_current_pos[1], None
+
+    def deflect_ball_from_paddle(self, paddle_height, paddle_y, base_angle=90, max_deflection=45):
+
+        angle_offset_weight = ((self.y + self.radius - paddle_y) / paddle_height) * 2 - 1
+
+        angle_offset = angle_offset_weight * max_deflection
+
+        print(angle_offset)
+        #breakpoint()
+
+        new_angle = base_angle + angle_offset
+
+        return new_angle
 
     def draw(self, screen):
         if ENABLE_DISPLAY:
@@ -159,7 +133,7 @@ class PongServer:
         global player1, player2
         player1 = Paddle(10, 150, 11, 100, (0, 255, 0))
         player2 = Paddle(780, 150, 11, 100, (255, 0, 0))
-        self.ball = Ball(400, 200, 20, 20, 45)
+        self.ball = Ball(400, 200, 20, 45)
 
         if ENABLE_DISPLAY:
             pygame.init()

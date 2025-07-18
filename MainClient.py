@@ -136,5 +136,5 @@ class Client:
             pygame.quit()
 
 if __name__ == "__main__":
-    client = Client(host="192.168.55.8")
+    client = Client(host="localhost")
     client.run()
