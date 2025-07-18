@@ -1,9 +1,7 @@
 import socket
 import threading
 import keyboard
-import time
 import sys
-import math
 
 import pygame
 
