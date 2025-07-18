@@ -59,14 +59,17 @@ class Ball():
         current_pos = (self.x, self.y)
         players = [player1, player2]
         for player in players:
-            self.x, self.y, collision_point, offset = self.correct_exact_overlap(self.mask, current_pos, previous_pos, player.mask, (player.x, player.y))
+            self.x, self.y, collision_point  = self.correct_exact_overlap(self.mask, current_pos, previous_pos, player.mask, (player.x, player.y))
             current_pos = (self.x, self.y)
             print(self.x, self.y)
             if collision_point:
-                if player == players[0]:
-                    self.direction = self.deflect_ball_from_paddle(collision_point, player1.height, player1.y)
+                if self.y + self.radius >= player.y and self.y <= player.y + player.height:
+                    if player == players[0]:
+                        self.direction = self.deflect_ball_from_paddle(player1.height, player1.y)
+                    else:
+                        self.direction = self.deflect_ball_from_paddle(player2.height, player2.y, base_angle=270)
                 else:
-                    self.direction = self.deflect_ball_from_paddle(collision_point, player2.height, player2.y, base_angle=270)
+                    self.direction = 180 - self.direction
 
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
@@ -92,13 +95,13 @@ class Ball():
                 escape_offset = 1
                 x -= dx * escape_offset
                 y -= dy * escape_offset
-                return int(x), int(y), collision_point, offset
+                return int(x), int(y), collision_point
             
-        return ball_current_pos[0], ball_current_pos[1], None, None
+        return ball_current_pos[0], ball_current_pos[1], None
 
-    def deflect_ball_from_paddle(self, collision_point, paddle_height, paddle_y, base_angle=90, max_deflection=45):
+    def deflect_ball_from_paddle(self, paddle_height, paddle_y, base_angle=90, max_deflection=45):
 
-        angle_offset_weight = ((collision_point[1] + self.y - paddle_y) / paddle_height) * 2 - 1
+        angle_offset_weight = ((self.y + self.radius - paddle_y) / paddle_height) * 2 - 1
 
         angle_offset = -angle_offset_weight * max_deflection
 
